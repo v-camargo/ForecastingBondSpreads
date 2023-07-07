@@ -6,187 +6,8 @@ library(fpp3)
 library(gridExtra)
 library(purrr)
 
-### Importando os dados --------------------------------------------------------
-rawData <- readxl::read_xlsx("forecastbonds_treated.xlsx", sheet = "bonds")
+### Definição de algmas funções----------------
 
-#verificando se todos os ativos têm a mesma qtd de dias:
-rawData |> glimpse()
-rawData |> group_by(rawData$Ativo) |> summarise(min = min(Data),
-                                                max = max(Data),
-                                                observacoes = n())
-#Ativos que estão sendo analisados:
-Ativos <- rawData$Ativo |> unique() 
-
-
-# Criando o df Data - Ativo - Yield:
-bondsYield <- rawData |> select(Data, Ativo, YAS_BOND_YLD) |> 
-                         rename(bondYield = YAS_BOND_YLD)
-bondsYield <- bondsYield |> as_tsibble(key = Ativo, index = Data, regular = FALSE)
-
-
-### Análise Exploratória e definição da base para modelo -----------------------
-bondsYield |> autoplot(bondYield)
-
-#Percebemos que há uma descontinuidade nos dados dos bonds de hidrovias
-yields <- bondsYield |> filter(Data > "2018-01-24") 
-
-
-### estudo da série ---------------------------------------------
-
-#Adicionando o retorno dos yields
-yields <- yields |> mutate(rDiario = bondYield/lag(bondYield)-1)
-#retirando o primeiro dia (retorno = NA)
-yieldsClean <- yields |> group_by(Ativo) |> 
-               filter(is.na(rDiario) == FALSE)
-
-#plotando os graficos de yield e retornos
-p1 <- yieldsClean |> autoplot(bondYield)
-p2 <- yieldsClean |> autoplot(rDiario) +
-          facet_wrap(~Ativo, ncol = 1)
-
-grid.arrange(p1, p2)
-
-## Plotando os graficos de ACF e PACF dos log-retornos
-#ACF
-yieldsClean |> ACF(rDiario) |> autoplot()
-
-#PACF
-yieldsClean |> PACF(rDiario) |> autoplot()
-
-#analisando os gráficos de ACF e PACF, percebemos a presença de alguma autocorrelação
-#em da série, o que nos faz inferir que a série não pode diretamente ser classificada
-#como "estacionária". Para verificarmos se a série se trata de um ruído branco, utilizaremos
-#os testes a seguir.
-
-## Teste de Ljung-Box:
-# para realizarmos o teste, precisamos ter em mente a definição das hipóteses nulas.
-
-#H0: a série se comporta como um ruído branco
-#H1: a série não se comporta como um ruído branco
-
-#criando o df que será utilizado no modelo
-yieldsTibble <- yieldsClean |> as_tibble()
-
-
-#extraindo somente os retornos da série
-rCMIGBZ24 <- yieldsTibble |> filter(Ativo == "CMIGBZ24") |> select(rDiario)
-rHIDRVS25 <- yieldsTibble |> as_tibble() |> filter(Ativo == "HIDRVS25") |> select(rDiario)
-
-#exibindo os resultados do teste
-Box.test(rCMIGBZ24, lag=12, fitdf=1, type="Ljung-Box")
-Box.test(rHIDRVS25, lag=12, fitdf=1, type="Ljung-Box")
-
-#como o p-valor é muito baixo, rejeitamos a H0 e consideramos que a série não se
-#comporta como um ruído branco.
-
-### Modelos de Volatilidade ----------------------------------------------------
-#modelo individual---------
-
-garch_model <- ugarchspec(
-  variance.model = list(model="fGARCH", submodel="TGARCH", garchOrder=c(2, 2)),
-  mean.model = list(armaOrder = c(2, 3), include.mean = TRUE),
-  distribution.model = 'std')
-
-rDiario2 <- yieldsTibble %>% filter(Ativo=='CMIGBZ24') %>% select(rDiario) %>% pull()
-rDiario2 <- rDiario2^2
-rDiarioCEMIG <- yieldsTibble %>% filter(Ativo=='CMIGBZ24') %>% select(Data,rDiario) 
-rDiarioCEMIG <- rDiarioCEMIG |> column_to_rownames(var = 'Data')
-rDiarioCEMIG |> glimpse()
-
-fit <- ugarchfit(spec=garch_model, 
-                 data=rDiarioCEMIG, 
-                 solver='solnp', 
-                 solver.control=list(tol = 5e-8),
-                 out.sample = 10)
-
-resi <- residuals(fit, standardize=T)
-ts.plot(resi)
-acf(resi)
-Box.test(resi,lag=12,type="Ljung")
-
-fit |> infocriteria()
-
-#### backtest
-
-garchroll <- ugarchroll(spec=garch_model, 
-             data = rDiarioCEMIG, 
-             n.start = 1000,
-             refit.window = c("recursive", "moving"),
-             refit.every = 100)
-
-backtest <- garchroll |> as.data.frame()
-
-# Prediction error for the mean
-e  <- backtest$Realized - backtest$Mu  
-# Prediction error for the variance
-d  <- e^2 - backtest$Sigma^2 
-# Mean of prediction error
-mean(d^2)
-
-
-
-
-#### predict
-pred <- ugarchboot(fit, method = c("Partial"),
-                n.ahead = 30, 
-                n.bootpred = 500)
-show(pred)
-plot(pred)
-
-
-simulation <- ugarchsim(fit, 
-                        n.sim = 60, 
-                        m.sim = 100)
-simulation |> plot()
-resultSimula <- simulation |> fitted() |> as.data.frame()
-resultSimula |> glimpse()
-resultSimula <- resultSimula |> mutate(rMedio = rowMeans(resultSimula))
-
-simulacaoCEMIG <- resultSimula |> select(rMedio)
-simulacaoCEMIG |> glimpse()
-simulacaoCEMIG |> write.csv(file = 'result.csv')
-
-simulacaoCEMIG |> head()
-
-resultado <- yieldsTibble |> 
-             filter(Ativo == 'CMIGBZ24') |> 
-             select(Data, bondYield, rDiario)
-
-
-resultadof <- resultado |> tail(60)
-resultadof |> mutate(lagyield = lag(bondYield, -59)) |> tail()
-
-resultadof |> head()
-
-
-
-
-
-
-
-
-
-
-
-#não funcionou bem
-forecast <-ugarchforecast(fit,
-           n.ahead = 100,
-           n.roll = 9)
-
-forecast |> plot()
-
-
-
-
-#Para testar os diferentes modelos de volatilidade, iremos utilizar a seguinte tabela----
-mtr <- crossing(m=c(0:2), n=c(0:2), p=c(0:3), q=c(0:3), dist=c("std"))
-GridSearch <- bind_rows(cbind(tibble(model="fGARCH", submodel="TGARCH"), mtr),
-                        cbind(tibble(model="fGARCH", submodel="GARCH"), mtr)) %>%
-  tibble::rownames_to_column("id")
-#com base nos diferentes paramentros da tabela, rodaremos um grid search para escolher
-#o modelo que melhor perfroma através do Critério de Akaike
-
-#funções para rodar a busca em grid --------------------------------------------
 
 #função para encontrar o melhor modelo garch:
 find_best_garch <- function(ativo, grid, df){
@@ -197,10 +18,10 @@ find_best_garch <- function(ativo, grid, df){
   usethis::ui_info("Adjusting models for {ativo}...")
   #mostra o progresso
   progressr::with_progress({
-   prog <- progressr::progressor(nrow(grid))
-   models <- grid %>%
-     group_split(id) %>%
-     purrr::map(GModels, series=retDiario, prog)
+    prog <- progressr::progressor(nrow(grid))
+    models <- grid %>%
+      group_split(id) %>%
+      purrr::map(GModels, series=retDiario, prog)
   })
   safe_info <- purrr::possibly(infocriteria, tibble::tibble())
   
@@ -209,7 +30,7 @@ find_best_garch <- function(ativo, grid, df){
     info <- purrr::map(models, safe_info) %>%
       purrr::map(tibble::as_tibble, rownames = "criteria") %>%
       dplyr::bind_rows(.id = "id")
-   })
+  })
   return(info)
   
   #agrega as informações do modelo
@@ -257,11 +78,105 @@ GModels <- function(parms, series, prog = NULL){
   
   # ocultando os avisos quando o modelo não convergir
   suppressWarnings({fit <- ugarchfit(spec=garch_model, data=series, solver='solnp', solver.control=list(tol = 5e-8))})
-
+  
   
   # modelo ajustado
   fit
 }
+
+
+### Importando os dados --------------------------------------------------------
+rawDataFinal <- readxl::read_xlsx("forecastbondsfinal.xlsx", 
+                                   sheet = "import",
+                                   skip = 3)
+
+
+rawData <- readxl::read_xlsx("forecastbonds_treated.xlsx", sheet = "bonds")
+
+#verificando se todos os ativos têm a mesma qtd de dias:
+rawData |> glimpse()
+rawData |> group_by(rawData$Ativo) |> summarise(min = min(Data),
+                                                max = max(Data),
+                                                observacoes = n())
+#Ativos que estão sendo analisados:
+Ativos <- rawData$Ativo |> unique() 
+
+
+# Criando o df Data - Ativo - Yield:
+bondsYield <- rawData |> select(Data, Ativo, YAS_BOND_YLD) |> 
+                         rename(bondYield = YAS_BOND_YLD)
+bondsYield <- bondsYield |> as_tsibble(key = Ativo, index = Data, regular = FALSE)
+
+
+### Análise Exploratória e definição da base para modelo -----------------------
+bondsYield |> autoplot(bondYield)
+
+#Percebemos que há uma descontinuidade nos dados dos bonds de hidrovias
+yields <- bondsYield |> filter(Data > "2018-01-24") 
+
+
+### estudo da série ---------------------------------------------
+
+#Adicionando o retorno dos yields
+yields <- yields |> mutate(rDiario = bondYield/lag(bondYield)-1)
+#retirando o primeiro dia (retorno = NA)
+yieldsClean <- yields |> group_by(Ativo) |> 
+               filter(is.na(rDiario) == FALSE)
+
+#plotando os graficos de yield e retornos
+p1 <- yieldsClean |> autoplot(bondYield)
+p2 <- yieldsClean |> autoplot(rDiario) +
+          facet_wrap(~Ativo, ncol = 1)
+
+grid.arrange(p1, p2)
+
+## Plotando os graficos de ACF e PACF dos log-retornos
+#ACF
+yieldsClean  |>  ACF(rDiario) |> autoplot()
+
+#PACF
+yieldsClean |> PACF(rDiario) |> autoplot()
+
+#analisando os gráficos de ACF e PACF, percebemos a presença de alguma autocorrelação
+#em da série, o que nos faz inferir que a série não pode diretamente ser classificada
+#como "estacionária". Para verificarmos se a série se trata de um ruído branco, utilizaremos
+#os testes a seguir.
+
+## Teste de Ljung-Box:
+# para realizarmos o teste, precisamos ter em mente a definição das hipóteses nulas.
+
+#H0: a série se comporta como um ruído branco
+#H1: a série não se comporta como um ruído branco
+
+#criando o df que será utilizado no modelo
+yieldsTibble <- yieldsClean |> as_tibble()
+yieldsSplitted <- yieldsTibble |> split(yieldsTibble$Ativo)
+
+#realizando o teste de LJung-Box
+whiteNoiseTest <- tibble(Ativo=as.character(), pValor=as.double())
+for (j in Ativos){
+  rAtivo <- yieldsTibble |> filter(Ativo == j) |> select(rDiario)
+  Ljung <-Box.test(rAtivo, lag=12, fitdf=1, type="Ljung-Box")
+  whiteNoiseTest <- whiteNoiseTest |> bind_rows(tibble(Ativo=j,pValor=Ljung$p.value)) |> as.data.frame()
+}
+
+whiteNoiseTest
+
+#como o p-valor é muito baixo, rejeitamos a H0 e consideramos que a série não se
+#comporta como um ruído branco.
+
+### Modelos de Volatilidade ----------------------------------------------------
+
+#Para testar os diferentes modelos de volatilidade, iremos utilizar a seguinte tabela----
+mtr <- crossing(m=c(0:2), n=c(0:2), p=c(0:3), q=c(0:3), dist=c("std"))
+GridSearch <- bind_rows(cbind(tibble(model="fGARCH", submodel="TGARCH"), mtr),
+                        cbind(tibble(model="fGARCH", submodel="GARCH"), mtr)) %>%
+  tibble::rownames_to_column("id")
+#com base nos diferentes paramentros da tabela, rodaremos um grid search para escolher
+#o modelo que melhor perfroma através do Critério de Akaike
+
+#funções para rodar a busca em grid --------------------------------------------
+
 
           
      
@@ -310,7 +225,6 @@ finalsimulation |> summary()
 finalsimulation |> fitted()
 
 #-----------------------------------------------------------------------------
-modeloFinal[1,]$Ativo
 
 
 #df para salvar os dados do modelo
@@ -397,8 +311,8 @@ errorFinal <- error1 |>
               group_by(Ativo) |> 
               reframe(erro=mean(d^2))
 
-saveResult 
-modeloFinal
+
+saveResult |> write.csv("resultfinal.csv") 
 
 
-simuModel |> plot()
+

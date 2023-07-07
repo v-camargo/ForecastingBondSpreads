@@ -1,0 +1,527 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={ForecastBonds},
+  pdfauthor={Risco - Augme},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{ForecastBonds}
+\author{Risco - Augme}
+\date{2023-07-07}
+
+\begin{document}
+\maketitle
+
+\hypertarget{bibliotecas-utilizadas}{%
+\subsection{Bibliotecas Utilizadas}\label{bibliotecas-utilizadas}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(rugarch)}
+\FunctionTok{library}\NormalTok{(fGarch)}
+\FunctionTok{library}\NormalTok{(timeSeries)}
+\FunctionTok{library}\NormalTok{(fpp3)}
+\FunctionTok{library}\NormalTok{(gridExtra)}
+\FunctionTok{library}\NormalTok{(purrr)}
+\FunctionTok{library}\NormalTok{(bizdays)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{definiuxe7uxe3o-de-funuxe7uxf5es}{%
+\subsection{Definição de
+Funções}\label{definiuxe7uxe3o-de-funuxe7uxf5es}}
+
+Utilizaremos estas funções para ajustar o modelo através do grid search:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Função para fitting do modelo GARCH especificado}
+\NormalTok{GModels }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(parms, series, }\AttributeTok{prog =} \ConstantTok{NULL}\NormalTok{)\{}
+  
+  \ControlFlowTok{if}\NormalTok{ (}\SpecialCharTok{!}\FunctionTok{is.null}\NormalTok{(prog)) }\FunctionTok{prog}\NormalTok{()}
+  
+  \CommentTok{\#configurando o modelo iGARCH}
+  \ControlFlowTok{if}\NormalTok{(parms}\SpecialCharTok{$}\NormalTok{model}\SpecialCharTok{==}\StringTok{"iGARCH"}\NormalTok{)\{}
+\NormalTok{    garch\_model }\OtherTok{=} \FunctionTok{ugarchspec}\NormalTok{(}
+      \AttributeTok{variance.model =} \FunctionTok{list}\NormalTok{(}\AttributeTok{model=}\NormalTok{parms}\SpecialCharTok{$}\NormalTok{model, }\AttributeTok{garchOrder=}\FunctionTok{c}\NormalTok{(parms}\SpecialCharTok{$}\NormalTok{m, parms}\SpecialCharTok{$}\NormalTok{n)),}
+      \AttributeTok{mean.model =} \FunctionTok{list}\NormalTok{(}\AttributeTok{armaOrder =} \FunctionTok{c}\NormalTok{(parms}\SpecialCharTok{$}\NormalTok{p, parms}\SpecialCharTok{$}\NormalTok{q), }\AttributeTok{include.mean =} \ConstantTok{TRUE}\NormalTok{),}
+      \AttributeTok{distribution.model =}\NormalTok{ parms}\SpecialCharTok{$}\NormalTok{dist)}
+\NormalTok{  \}}
+  
+  \CommentTok{\#configurando os outros modelos}
+  \ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    garch\_model }\OtherTok{=} \FunctionTok{ugarchspec}\NormalTok{(}
+      \AttributeTok{variance.model =} \FunctionTok{list}\NormalTok{(}\AttributeTok{model=}\NormalTok{parms}\SpecialCharTok{$}\NormalTok{model, }\AttributeTok{submodel=}\NormalTok{parms}\SpecialCharTok{$}\NormalTok{submodel, }\AttributeTok{garchOrder=}\FunctionTok{c}\NormalTok{(parms}\SpecialCharTok{$}\NormalTok{m, parms}\SpecialCharTok{$}\NormalTok{n)),}
+      \AttributeTok{mean.model =} \FunctionTok{list}\NormalTok{(}\AttributeTok{armaOrder =} \FunctionTok{c}\NormalTok{(parms}\SpecialCharTok{$}\NormalTok{p, parms}\SpecialCharTok{$}\NormalTok{q), }\AttributeTok{include.mean =} \ConstantTok{TRUE}\NormalTok{),}
+      \AttributeTok{distribution.model =}\NormalTok{ parms}\SpecialCharTok{$}\NormalTok{dist}
+\NormalTok{    )}
+\NormalTok{  \}}
+  
+  \CommentTok{\# ocultando os avisos quando o modelo não convergir}
+  \FunctionTok{suppressWarnings}\NormalTok{(\{fit }\OtherTok{\textless{}{-}} \FunctionTok{ugarchfit}\NormalTok{(}\AttributeTok{spec=}\NormalTok{garch\_model, }\AttributeTok{data=}\NormalTok{series, }\AttributeTok{solver=}\StringTok{\textquotesingle{}solnp\textquotesingle{}}\NormalTok{, }\AttributeTok{solver.control=}\FunctionTok{list}\NormalTok{(}\AttributeTok{tol =} \FloatTok{5e{-}8}\NormalTok{))\})}
+  
+  
+  \CommentTok{\# fitting do modelo}
+\NormalTok{  fit}
+\NormalTok{\}}
+
+
+\DocumentationTok{\#\# Função para encontrar o melhor os melhores parametros para a família de moodelos GARCH:}
+\NormalTok{find\_best\_garch }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(ativo, grid, df)\{}
+  \CommentTok{\#seleciona o retorno do ativo}
+\NormalTok{  retDiario }\OtherTok{\textless{}{-}}\NormalTok{ bondsTibble }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(Ativo}\SpecialCharTok{==}\NormalTok{ativo) }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(rDiario) }\SpecialCharTok{|\textgreater{}} \FunctionTok{pull}\NormalTok{()}
+  
+  \CommentTok{\#deixa visível ao usuário o progresso do ajuste do modelo}
+\NormalTok{  usethis}\SpecialCharTok{::}\FunctionTok{ui\_info}\NormalTok{(}\StringTok{"Adjusting models for \{ativo\}..."}\NormalTok{)}
+
+\NormalTok{  progressr}\SpecialCharTok{::}\FunctionTok{with\_progress}\NormalTok{(\{}
+\NormalTok{    prog }\OtherTok{\textless{}{-}}\NormalTok{ progressr}\SpecialCharTok{::}\FunctionTok{progressor}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(grid))}
+\NormalTok{    models }\OtherTok{\textless{}{-}}\NormalTok{ grid }\SpecialCharTok{\%\textgreater{}\%}
+      \FunctionTok{group\_split}\NormalTok{(id) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(GModels, }\AttributeTok{series=}\NormalTok{retDiario, prog)}
+\NormalTok{  \})}
+\NormalTok{  safe\_info }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{possibly}\NormalTok{(infocriteria, tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{())}
+  
+  \CommentTok{\#agrega as informações de parâmetros dos modelos testados}
+  \FunctionTok{suppressWarnings}\NormalTok{(\{}
+\NormalTok{    info }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(models, safe\_info) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(tibble}\SpecialCharTok{::}\NormalTok{as\_tibble, }\AttributeTok{rownames =} \StringTok{"criteria"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      dplyr}\SpecialCharTok{::}\FunctionTok{bind\_rows}\NormalTok{(}\AttributeTok{.id =} \StringTok{"id"}\NormalTok{)}
+\NormalTok{  \})}
+  \FunctionTok{return}\NormalTok{(info)}
+  
+  \CommentTok{\#seleciona os parâmetros do melhor modelo através do critério de Akaike}
+\NormalTok{  best }\OtherTok{\textless{}{-}}\NormalTok{ info }\SpecialCharTok{|\textgreater{}} 
+    \FunctionTok{inner\_join}\NormalTok{(grid, }\StringTok{"id"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+    \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =}\NormalTok{ criteria, }\AttributeTok{values\_from =}\NormalTok{ V1) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{    janitor}\SpecialCharTok{::}\FunctionTok{clean\_names}\NormalTok{() }\SpecialCharTok{|\textgreater{}} 
+    \FunctionTok{arrange}\NormalTok{(akaike)}
+  
+  
+  \CommentTok{\#seleciona os melhores paramestros}
+\NormalTok{  usethis}\SpecialCharTok{::}\FunctionTok{ui\_info}\NormalTok{(}\FunctionTok{c}\NormalTok{(}
+    \StringTok{"Best model:"}\NormalTok{,}
+    \StringTok{"p \textless{}{-} \{best$p[1]\}"}\NormalTok{,}
+    \StringTok{"q \textless{}{-} \{best$q[1]\}"}\NormalTok{,}
+    \StringTok{"m \textless{}{-} \{best$m[1]\}"}\NormalTok{,}
+    \StringTok{"n \textless{}{-} \{best$n[1]\}"}
+\NormalTok{  ))}
+  
+\NormalTok{  best}
+  
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{importauxe7uxe3o-e-transformauxe7uxe3o-dos-dados}{%
+\subsection{Importação e Transformação dos
+Dados}\label{importauxe7uxe3o-e-transformauxe7uxe3o-dos-dados}}
+
+Os dados devem ser importados via planilha \textbf{importBonds} em excel
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rawDataFinal }\OtherTok{\textless{}{-}}\NormalTok{ readxl}\SpecialCharTok{::}\FunctionTok{read\_xlsx}\NormalTok{(}\StringTok{"importBonds.xlsx"}\NormalTok{, }
+                                   \AttributeTok{sheet =} \StringTok{"import"}\NormalTok{,}
+                                   \AttributeTok{skip =} \DecValTok{3}\NormalTok{)}
+\CommentTok{\#transforma a tabela em formato tidy data}
+\NormalTok{tidyData }\OtherTok{\textless{}{-}}\NormalTok{ rawDataFinal }\SpecialCharTok{|\textgreater{}} 
+            \FunctionTok{mutate\_if}\NormalTok{(is.double, as.character) }\SpecialCharTok{|\textgreater{}} 
+            \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \SpecialCharTok{!}\NormalTok{Dates, }\AttributeTok{names\_to =} \StringTok{"Ativo"}\NormalTok{)}
+
+\CommentTok{\#retira N/A e converte as colunas para o tipo correto }
+\NormalTok{tidyData }\OtherTok{\textless{}{-}}\NormalTok{ tidyData }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{grepl}\NormalTok{(}\StringTok{"N/A"}\NormalTok{, value))}
+\NormalTok{tidyData }\OtherTok{\textless{}{-}}\NormalTok{ tidyData }\SpecialCharTok{|\textgreater{}} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Dates=}\FunctionTok{as.Date}\NormalTok{(Dates),}
+                               \AttributeTok{value =} \FunctionTok{as.double}\NormalTok{(value))}
+
+\CommentTok{\#cria o df de time series}
+\NormalTok{bondsTS }\OtherTok{\textless{}{-}}\NormalTok{ tidyData }\SpecialCharTok{|\textgreater{}} \FunctionTok{as\_tsibble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ Ativo, }\AttributeTok{index =}\NormalTok{ Dates, }\AttributeTok{regular =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\#cria variável para controlar os ativos que estão sendo analisados}
+\NormalTok{ativosAnalisados }\OtherTok{\textless{}{-}}\NormalTok{ tidyData}\SpecialCharTok{$}\NormalTok{Ativo }\SpecialCharTok{|\textgreater{}} \FunctionTok{unique}\NormalTok{()}
+
+\CommentTok{\#Adicionando o retorno dos ativos}
+\NormalTok{bondsTS }\OtherTok{\textless{}{-}}\NormalTok{ bondsTS }\SpecialCharTok{|\textgreater{}}\FunctionTok{group\_by}\NormalTok{(Ativo) }\SpecialCharTok{|\textgreater{}} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{rDiario =}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{lag}\NormalTok{(value)}\SpecialCharTok{/}\NormalTok{value}\DecValTok{{-}1}\NormalTok{)}
+
+\CommentTok{\#retirando o primeiro dia (retorno = NA)}
+\NormalTok{bondsTSClean }\OtherTok{\textless{}{-}}\NormalTok{ bondsTS }\SpecialCharTok{|\textgreater{}} \FunctionTok{group\_by}\NormalTok{(Ativo) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{                dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(rDiario) }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{suxe9ries-analisadas}{%
+\subsection{Séries Analisadas}\label{suxe9ries-analisadas}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bondsTSClean }\SpecialCharTok{|\textgreater{}} \FunctionTok{autoplot}\NormalTok{(value)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ForecastBonds_files/figure-latex/series plot-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bondsTSClean }\SpecialCharTok{|\textgreater{}} \FunctionTok{autoplot}\NormalTok{(rDiario) }\SpecialCharTok{+}
+          \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{Ativo,}\AttributeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ForecastBonds_files/figure-latex/series plot-2.pdf}
+
+\hypertarget{gruxe1ficos-de-autocorrelauxe7uxe3o-dos-retornos}{%
+\subsubsection{Gráficos de Autocorrelação dos
+Retornos}\label{gruxe1ficos-de-autocorrelauxe7uxe3o-dos-retornos}}
+
+No geral, a autocorrelação de uma série decai para zero quanto maior a
+defasagem, mas, no caso de um processo estacionário, a autocorrelação
+decai muito rápido para zero conforme a defasagem aumenta (geralmente de
+maneira exponencial ou com senoides amortecidas). Precisamos entender se
+as séries com que estamos trabalhando apresentam comportamento de ruído
+branco ou não
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#ACF}
+\NormalTok{bondsTSClean  }\SpecialCharTok{|\textgreater{}}  \FunctionTok{ACF}\NormalTok{(rDiario) }\SpecialCharTok{|\textgreater{}} \FunctionTok{autoplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ForecastBonds_files/figure-latex/ACF-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#PACF}
+\NormalTok{bondsTSClean }\SpecialCharTok{|\textgreater{}} \FunctionTok{PACF}\NormalTok{(rDiario) }\SpecialCharTok{|\textgreater{}} \FunctionTok{autoplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ForecastBonds_files/figure-latex/ACF-2.pdf} Em
+finanças, como fato estilizado, os retornos dos ativos se comportam de
+maneira parecida com um ruído branco, sendo assim, analisar somente os
+gráficos ACF e PACF pode nos levar a conclusões errôneas. Para testarmos
+se a série com a qual trabalharemos nos modelos é um ruído branco ou
+não, podemos utilizar o teste estatístico de Ljung-Box.
+
+\hypertarget{teste-de-ljung-box}{%
+\subsubsection{Teste de Ljung-Box}\label{teste-de-ljung-box}}
+
+Este teste visa entender se a série estudada se comporta como ruído
+branco através do seguinte teste de hipótese:
+
+\begin{itemize}
+\tightlist
+\item
+  H0: a série \textbf{se comporta como um ruído branco}
+\item
+  H1: a série \textbf{não se comporta como um ruído branco}
+\end{itemize}
+
+Em outras palavras, caso o p-valor seja substancialmente pequeno
+(\textless0.05), podemos concluir que a série não se comporta como um
+ruído branco, sugerindo que a série tem autocorrelação.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#criando o df que será utilizado para o teste e para o posterior modelo}
+\NormalTok{bondsTibble }\OtherTok{\textless{}{-}}\NormalTok{ bondsTSClean }\SpecialCharTok{|\textgreater{}} \FunctionTok{as\_tibble}\NormalTok{()}
+
+\CommentTok{\#realizando o teste de LJung{-}Box}
+\NormalTok{whiteNoiseTest }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Ativo=}\FunctionTok{as.character}\NormalTok{(), }\AttributeTok{pValor=}\FunctionTok{as.double}\NormalTok{())}
+\ControlFlowTok{for}\NormalTok{ (j }\ControlFlowTok{in}\NormalTok{ ativosAnalisados)\{}
+\NormalTok{  rAtivo }\OtherTok{\textless{}{-}}\NormalTok{ bondsTibble }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(Ativo }\SpecialCharTok{==}\NormalTok{ j) }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(rDiario)}
+\NormalTok{  Ljung }\OtherTok{\textless{}{-}}\FunctionTok{Box.test}\NormalTok{(rAtivo, }\AttributeTok{lag=}\DecValTok{12}\NormalTok{, }\AttributeTok{fitdf=}\DecValTok{1}\NormalTok{, }\AttributeTok{type=}\StringTok{"Ljung{-}Box"}\NormalTok{)}
+\NormalTok{  whiteNoiseTest }\OtherTok{\textless{}{-}}\NormalTok{ whiteNoiseTest }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{bind\_rows}\NormalTok{(}\FunctionTok{tibble}\NormalTok{(}\AttributeTok{Ativo=}\NormalTok{j,}\AttributeTok{pValor=}\NormalTok{Ljung}\SpecialCharTok{$}\NormalTok{p.value)) }\SpecialCharTok{|\textgreater{}} \FunctionTok{as.data.frame}\NormalTok{()}
+\NormalTok{\}}
+
+\NormalTok{whiteNoiseTest}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      Ativo       pValor
+## 1 ITAUBZ17 0.000000e+00
+## 2 CMIGBZ24 0.000000e+00
+## 3 ITAUBZ18 0.000000e+00
+## 4 SIMPAR31 3.050515e-11
+## 5 MOVIBZ31 1.394549e-10
+## 6 HIDRVS31 0.000000e+00
+## 7 PRIOBZ26 0.000000e+00
+## 8   STNE28 1.910916e-12
+\end{verbatim}
+
+\hypertarget{modelos-de-heterocedasticidade-condicional-auto-regressiva-generalizada-garch}{%
+\subsection{Modelos de Heterocedasticidade Condicional Auto-Regressiva
+Generalizada
+(GARCH)}\label{modelos-de-heterocedasticidade-condicional-auto-regressiva-generalizada-garch}}
+
+\hypertarget{grid-search---definindo-o-melhor-modelo-para-cada-suxe9rie}{%
+\subsubsection{Grid Search - Definindo o melhor modelo para cada
+série}\label{grid-search---definindo-o-melhor-modelo-para-cada-suxe9rie}}
+
+Esta família de modelos tratam séries com variância não constante ao
+longo do tempo (heterocedasticidade). Para modelarmos a série, iremos
+utilizar a distribuição \textbf{t-student} por ser simétrica com caudas
+mais pesadas (distribuição leptocúrtica), característica observada nos
+retornos dos ativos do mercado financeiro.
+
+Iremos testar diferentes modelos e parâmetros para escolher o melhor
+através do menor critério de Akaike. Será realizada uma combinação do
+modelo fGARCH com os submodelos TGARCH e GARCH com os valores de
+\textbf{m} e \textbf{n} variando entre 0 e 2 e com os valores de
+\textbf{p} e \textbf{q} variando entre 0 e 3.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Para testar os diferentes modelos de volatilidade, iremos utilizar a seguinte tabela}
+\CommentTok{\#mtr \textless{}{-} crossing(m=c(0:2), n=c(0:2), p=c(0:3), q=c(0:3), dist=c("std"))}
+\CommentTok{\#GridSearch \textless{}{-} bind\_rows(cbind(tibble(model="fGARCH", submodel="TGARCH"), mtr),}
+\CommentTok{\#                        cbind(tibble(model="fGARCH", submodel="GARCH"), mtr)) \%\textgreater{}\%}
+\CommentTok{\#  tibble::rownames\_to\_column("id")}
+
+\CommentTok{\#Rodando cada linha especificação do GridSearch nos modelos}
+\CommentTok{\#bestModels \textless{}{-} ativosAnalisados |\textgreater{} }
+\CommentTok{\#  set\_names() |\textgreater{} }
+\CommentTok{\#  map(find\_best\_garch, grid=GridSearch) |\textgreater{} }
+\CommentTok{\#  bind\_rows(.id="Ativo")}
+
+\CommentTok{\#Escolhando a melhor especificação para cada ativo através do Critério de Akaike}
+\CommentTok{\#modeloFinal \textless{}{-}  bestModels \%\textgreater{}\%}
+\CommentTok{\#  dplyr::filter(criteria == \textquotesingle{}Akaike\textquotesingle{}) |\textgreater{} }
+\CommentTok{\#  group\_by(Ativo) |\textgreater{} }
+\CommentTok{\#  slice(which.min(V1)) |\textgreater{} }
+\CommentTok{\#  merge(GridSearch, by.x="id", by.y="id", all.x=FALSE, all.y=FALSE) |\textgreater{} }
+\CommentTok{\#  select({-}id) |\textgreater{} }
+\CommentTok{\#  rename(criteriaValue=V1)}
+  
+
+\NormalTok{modeloFinal }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Ativo=}\FunctionTok{c}\NormalTok{(}\StringTok{"ITAUBZ18"}\NormalTok{, }\StringTok{"PRIOBZ26"}\NormalTok{, }\StringTok{"ITAUBZ17"}\NormalTok{,}\StringTok{"STNE28"}\NormalTok{,}\StringTok{"MOVIBZ31"}\NormalTok{,}\StringTok{"SIMPAR31"}\NormalTok{, }\StringTok{"CMIGBZ24"}\NormalTok{,}\StringTok{"HIDRVS31"}\NormalTok{),}
+             \AttributeTok{criteria =} \StringTok{"Akaike"}\NormalTok{,}
+             \AttributeTok{criteriaValue =}
+               \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{10.031020}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{9.597698}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{9.773093}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{8.156528}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{8.245174}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{8.243398}\NormalTok{,}\SpecialCharTok{{-}}\FloatTok{10.194153}\NormalTok{, }\SpecialCharTok{{-}}\FloatTok{9.042531}\NormalTok{),}
+             \AttributeTok{model=}\StringTok{"fGARCH"}\NormalTok{,}
+             \AttributeTok{submodel=}\FunctionTok{c}\NormalTok{(}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"GARCH"}\NormalTok{,}\StringTok{"TGARCH"}\NormalTok{,}\StringTok{"TGARCH"}\NormalTok{),}
+             \AttributeTok{m=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+             \AttributeTok{n=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}
+             \AttributeTok{p=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+             \AttributeTok{q=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+             \AttributeTok{dist=}\StringTok{"std"}
+             
+\NormalTok{             )}
+
+\NormalTok{modeloFinal}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 8 x 10
+##   Ativo    criteria criteriaValue model  submodel     m     n     p     q dist 
+##   <chr>    <chr>            <dbl> <chr>  <chr>    <dbl> <dbl> <dbl> <dbl> <chr>
+## 1 ITAUBZ18 Akaike          -10.0  fGARCH GARCH        2     1     0     0 std  
+## 2 PRIOBZ26 Akaike           -9.60 fGARCH GARCH        2     1     2     1 std  
+## 3 ITAUBZ17 Akaike           -9.77 fGARCH GARCH        2     2     0     2 std  
+## 4 STNE28   Akaike           -8.16 fGARCH GARCH        2     2     1     2 std  
+## 5 MOVIBZ31 Akaike           -8.25 fGARCH GARCH        2     2     2     0 std  
+## 6 SIMPAR31 Akaike           -8.24 fGARCH GARCH        2     2     3     0 std  
+## 7 CMIGBZ24 Akaike          -10.2  fGARCH TGARCH       0     1     3     3 std  
+## 8 HIDRVS31 Akaike           -9.04 fGARCH TGARCH       0     2     0     0 std
+\end{verbatim}
+
+\hypertarget{simulando---prediuxe7uxe3o-dos-retornos-futuros}{%
+\subsubsection{Simulando - Predição dos retornos
+futuros}\label{simulando---prediuxe7uxe3o-dos-retornos-futuros}}
+
+Tendo as especificações finais de cada modelo para cada série de retorno
+analisada, iremos simular \textbf{100 cenários} futuros para os próximos
+\textbf{60 dias} e agregar os resultados pela média das predições das
+simulações em cada data futura.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#df para salvar os resultados}
+\CommentTok{\#saveResult \textless{}{-} tibble(dataFutura=as.character(),}
+\CommentTok{\#                     Ativo=as.character(), }
+\CommentTok{\#                     rPrevisto=as.double())}
+
+\CommentTok{\#for (i in seq(1,nrow(modeloFinal)))\{}
+
+\CommentTok{\#o modelo roda somente no df com o retorno do ativo:}
+\CommentTok{\#rAtivo \textless{}{-} bondsTibble |\textgreater{}}
+\CommentTok{\#  dplyr::filter(Ativo == modeloFinal[i,]$Ativo) |\textgreater{}}
+\CommentTok{\#  select(Dates, rDiario) |\textgreater{}}
+\CommentTok{\#  column\_to\_rownames(var = \textquotesingle{}Dates\textquotesingle{})}
+
+\CommentTok{\#especificação do modelo conforme o grid search: }
+\CommentTok{\#specModel \textless{}{-} ugarchspec(}
+\CommentTok{\#              variance.model = list(model=modeloFinal[i,]$model, \#submodel=modeloFinal[i,]$submodel, garchOrder=c(modeloFinal[i,]$m, \#modeloFinal[i,]$n)),}
+\CommentTok{\#              mean.model = list(armaOrder = c(modeloFinal[i,]$p, modeloFinal[i,]$q), \#include.mean = TRUE),}
+\CommentTok{\#              distribution.model = modeloFinal[i,]$dist)}
+
+\CommentTok{\#fitando o modelo especificado }
+\CommentTok{\#fitModel \textless{}{-} ugarchfit(}
+\CommentTok{\#            spec = specModel,}
+\CommentTok{\#            data = rAtivo,}
+\CommentTok{\#            solver = \textquotesingle{}hybrid\textquotesingle{})}
+            \CommentTok{\#solver.control = list(tol = 5e{-}8))}
+            \CommentTok{\#out.sample = 10)}
+
+\CommentTok{\#simulando diversos cenários }
+\CommentTok{\#simuModel \textless{}{-} ugarchsim(fitModel,}
+\CommentTok{\#                       n.sim = 60,}
+\CommentTok{\#                       m.sim = 100,}
+\CommentTok{\#                       rseed = 42)}
+
+\CommentTok{\#o retorno previsto dos ativos é a média de todos os cenários simulados}
+\CommentTok{\#resultSimu \textless{}{-} simuModel |\textgreater{} fitted() |\textgreater{} as.data.frame() }
+\CommentTok{\#resultSimu \textless{}{-} resultSimu |\textgreater{} mutate(rMedio = rowMeans(resultSimu)) |\textgreater{} rownames\_to\_column("dataFutura")}
+
+\CommentTok{\#resultModel \textless{}{-} resultSimu |\textgreater{} select(dataFutura, rMedio)}
+
+\CommentTok{\#saveResult \textless{}{-} saveResult |\textgreater{} bind\_rows(tibble(dataFutura=resultModel$dataFutura,Ativo=modeloFinal[i,]$Ativo, rPrevisto=resultModel$rMedio))}
+
+\CommentTok{\#\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{resultados}{%
+\subsection{Resultados}\label{resultados}}
+
+As predições são geradas em um arquivo .csv para posterior manipulação
+via excel.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#saveResult |\textgreater{} write.csv("resultfinal.csv") }
+\end{Highlighting}
+\end{Shaded}
+
+Geramos os gráficos de predições (série a direita da linha vertical).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{saveResult}\OtherTok{\textless{}{-}}\FunctionTok{read.csv}\NormalTok{(}\StringTok{"resultfinal.csv"}\NormalTok{)}
+\NormalTok{saveResult}\OtherTok{\textless{}{-}}\NormalTok{ saveResult}\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{X)}
+\NormalTok{dataAtual }\OtherTok{\textless{}{-}}\NormalTok{ bondsTibble}\SpecialCharTok{$}\NormalTok{Dates }\SpecialCharTok{|\textgreater{}} \FunctionTok{max}\NormalTok{()}
+\NormalTok{anoAtual }\OtherTok{\textless{}{-}}\NormalTok{  bondsTibble}\SpecialCharTok{$}\NormalTok{Dates }\SpecialCharTok{|\textgreater{}} \FunctionTok{year}\NormalTok{() }\SpecialCharTok{|\textgreater{}} \FunctionTok{max}\NormalTok{()}
+
+\NormalTok{resultGraph }\OtherTok{\textless{}{-}}\NormalTok{ saveResult }\SpecialCharTok{|\textgreater{}} \FunctionTok{group\_by}\NormalTok{(Ativo) }\SpecialCharTok{|\textgreater{}} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{diaFuturo=}\FunctionTok{row\_number}\NormalTok{())}
+\NormalTok{resultGraph }\OtherTok{\textless{}{-}}\NormalTok{ resultGraph }\SpecialCharTok{|\textgreater{}} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Dates=}\FunctionTok{add.bizdays}\NormalTok{(dataAtual,diaFuturo))}
+\NormalTok{resultGraph }\OtherTok{\textless{}{-}}\NormalTok{ resultGraph }\SpecialCharTok{|\textgreater{}} \FunctionTok{rename}\NormalTok{(}\AttributeTok{rDiario=}\NormalTok{rPrevisto)}
+
+\NormalTok{passado }\OtherTok{\textless{}{-}}\NormalTok{ bondsTibble }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(Dates, Ativo, rDiario) }\SpecialCharTok{|\textgreater{}} \FunctionTok{group\_by}\NormalTok{(Ativo)}
+\NormalTok{futuro }\OtherTok{\textless{}{-}}\NormalTok{resultGraph }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(Dates, Ativo, rDiario)}
+\NormalTok{consolidado}\OtherTok{\textless{}{-}}\FunctionTok{bind\_rows}\NormalTok{(passado,futuro)}
+
+\NormalTok{consolidado }\SpecialCharTok{|\textgreater{}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\FunctionTok{year}\NormalTok{(Dates)}\SpecialCharTok{\textgreater{}=}\NormalTok{ anoAtual}\DecValTok{{-}1}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+               \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{Dates, }\AttributeTok{y=}\NormalTok{rDiario, }\AttributeTok{color=}\NormalTok{Ativo))}\SpecialCharTok{+}
+               \FunctionTok{geom\_line}\NormalTok{()}\SpecialCharTok{+}
+               \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept=}\NormalTok{dataAtual)}\SpecialCharTok{+}
+               \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{Ativo,}\AttributeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ForecastBonds_files/figure-latex/result graphs-1.pdf}
+
+\end{document}

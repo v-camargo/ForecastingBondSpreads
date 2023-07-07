@@ -1,0 +1,331 @@
+---
+title: "ForecastBonds"
+author: "Risco - Augme"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Bibliotecas Utilizadas
+
+```{r libraries}
+library(tidyverse)
+library(rugarch)
+library(fGarch)
+library(timeSeries)
+library(fpp3)
+library(gridExtra)
+library(purrr)
+library(bizdays)
+```
+
+## Definição de Funções
+
+Utilizaremos estas funções para ajustar o modelo através do grid search:
+
+```{r functions}
+
+## Função para fitting do modelo GARCH especificado
+GModels <- function(parms, series, prog = NULL){
+  
+  if (!is.null(prog)) prog()
+  
+  #configurando o modelo iGARCH
+  if(parms$model=="iGARCH"){
+    garch_model = ugarchspec(
+      variance.model = list(model=parms$model, garchOrder=c(parms$m, parms$n)),
+      mean.model = list(armaOrder = c(parms$p, parms$q), include.mean = TRUE),
+      distribution.model = parms$dist)
+  }
+  
+  #configurando os outros modelos
+  else{
+    garch_model = ugarchspec(
+      variance.model = list(model=parms$model, submodel=parms$submodel, garchOrder=c(parms$m, parms$n)),
+      mean.model = list(armaOrder = c(parms$p, parms$q), include.mean = TRUE),
+      distribution.model = parms$dist
+    )
+  }
+  
+  # ocultando os avisos quando o modelo não convergir
+  suppressWarnings({fit <- ugarchfit(spec=garch_model, data=series, solver='solnp', solver.control=list(tol = 5e-8))})
+  
+  
+  # fitting do modelo
+  fit
+}
+
+
+## Função para encontrar o melhor os melhores parametros para a família de moodelos GARCH:
+find_best_garch <- function(ativo, grid, df){
+  #seleciona o retorno do ativo
+  retDiario <- bondsTibble |> dplyr::filter(Ativo==ativo) |> dplyr::select(rDiario) |> pull()
+  
+  #deixa visível ao usuário o progresso do ajuste do modelo
+  usethis::ui_info("Adjusting models for {ativo}...")
+
+  progressr::with_progress({
+    prog <- progressr::progressor(nrow(grid))
+    models <- grid %>%
+      group_split(id) %>%
+      purrr::map(GModels, series=retDiario, prog)
+  })
+  safe_info <- purrr::possibly(infocriteria, tibble::tibble())
+  
+  #agrega as informações de parâmetros dos modelos testados
+  suppressWarnings({
+    info <- purrr::map(models, safe_info) %>%
+      purrr::map(tibble::as_tibble, rownames = "criteria") %>%
+      dplyr::bind_rows(.id = "id")
+  })
+  return(info)
+  
+  #seleciona os parâmetros do melhor modelo através do critério de Akaike
+  best <- info |> 
+    inner_join(grid, "id") |> 
+    pivot_wider(names_from = criteria, values_from = V1) |> 
+    janitor::clean_names() |> 
+    arrange(akaike)
+  
+  
+  #seleciona os melhores paramestros
+  usethis::ui_info(c(
+    "Best model:",
+    "p <- {best$p[1]}",
+    "q <- {best$q[1]}",
+    "m <- {best$m[1]}",
+    "n <- {best$n[1]}"
+  ))
+  
+  best
+  
+}
+
+```
+
+## Importação e Transformação dos Dados
+
+Os dados devem ser importados via planilha **importBonds** em excel
+
+```{r import data}
+
+rawDataFinal <- readxl::read_xlsx("importBonds.xlsx", 
+                                   sheet = "import",
+                                   skip = 3)
+#transforma a tabela em formato tidy data
+tidyData <- rawDataFinal |> 
+            mutate_if(is.double, as.character) |> 
+            pivot_longer(cols = !Dates, names_to = "Ativo")
+
+#retira N/A e converte as colunas para o tipo correto 
+tidyData <- tidyData |> dplyr::filter(!grepl("N/A", value))
+tidyData <- tidyData |> mutate(Dates=as.Date(Dates),
+                               value = as.double(value))
+
+#cria o df de time series
+bondsTS <- tidyData |> as_tsibble(key = Ativo, index = Dates, regular = FALSE)
+
+#cria variável para controlar os ativos que estão sendo analisados
+ativosAnalisados <- tidyData$Ativo |> unique()
+
+#Adicionando o retorno dos ativos
+bondsTS <- bondsTS |>group_by(Ativo) |> mutate(rDiario = dplyr::lag(value)/value-1)
+
+#retirando o primeiro dia (retorno = NA)
+bondsTSClean <- bondsTS |> group_by(Ativo) |> 
+                dplyr::filter(is.na(rDiario) == FALSE)
+
+```
+
+## Séries Analisadas
+
+```{r series plot}
+
+bondsTSClean |> autoplot(value)
+bondsTSClean |> autoplot(rDiario) +
+          facet_wrap(~Ativo,ncol = 2)
+
+```
+
+### Gráficos de Autocorrelação dos Retornos
+
+No geral, a autocorrelação  de uma série decai para zero quanto maior a defasagem, mas, no caso de um processo estacionário, a autocorrelação decai muito rápido para zero conforme a defasagem aumenta (geralmente de maneira exponencial ou com senoides amortecidas).
+Precisamos entender se as séries com que estamos trabalhando apresentam comportamento de ruído branco ou não
+
+```{r ACF}
+
+#ACF
+bondsTSClean  |>  ACF(rDiario) |> autoplot()
+
+#PACF
+bondsTSClean |> PACF(rDiario) |> autoplot()
+
+
+```
+Em finanças, como fato estilizado, os retornos dos ativos se comportam de maneira parecida com um ruído branco, sendo assim, analisar somente os gráficos ACF e PACF pode nos levar a conclusões errôneas.
+Para testarmos se a série com a qual trabalharemos nos modelos é um ruído branco ou não, podemos utilizar o teste estatístico de Ljung-Box.
+
+### Teste de Ljung-Box
+
+Este teste visa entender se a série estudada se comporta como ruído branco através do seguinte teste de hipótese:
+
+  - H0: a série **se comporta como um ruído branco**
+  - H1: a série **não se comporta como um ruído branco**
+
+Em outras palavras, caso o p-valor seja substancialmente pequeno (<0.05), podemos concluir que a série não se comporta como um ruído branco, sugerindo que a série tem autocorrelação.
+
+```{r ljung-box}
+#criando o df que será utilizado para o teste e para o posterior modelo
+bondsTibble <- bondsTSClean |> as_tibble()
+
+#realizando o teste de LJung-Box
+whiteNoiseTest <- tibble(Ativo=as.character(), pValor=as.double())
+for (j in ativosAnalisados){
+  rAtivo <- bondsTibble |> dplyr::filter(Ativo == j) |> dplyr::select(rDiario)
+  Ljung <-Box.test(rAtivo, lag=12, fitdf=1, type="Ljung-Box")
+  whiteNoiseTest <- whiteNoiseTest |> dplyr::bind_rows(tibble(Ativo=j,pValor=Ljung$p.value)) |> as.data.frame()
+}
+
+whiteNoiseTest
+
+```
+
+## Modelos de Heterocedasticidade Condicional Auto-Regressiva Generalizada (GARCH)
+
+### Grid Search - Definindo o melhor modelo para cada série  
+
+Esta família de modelos tratam séries com variância não constante ao longo do tempo (heterocedasticidade).
+Para modelarmos a série, iremos utilizar a distribuição **t-student** por ser simétrica com caudas mais pesadas (distribuição leptocúrtica), característica observada nos retornos dos ativos do mercado financeiro.
+
+Iremos testar diferentes modelos e parâmetros para escolher o melhor através do menor critério de Akaike.
+Será realizada uma combinação do modelo fGARCH com os submodelos TGARCH e GARCH com os valores de **m** e **n** variando entre 0 e 2 e com os valores de **p** e **q** variando entre 0 e 3.
+
+```{r grid search}
+#Para testar os diferentes modelos de volatilidade, iremos utilizar a seguinte tabela
+#mtr <- crossing(m=c(0:2), n=c(0:2), p=c(0:3), q=c(0:3), dist=c("std"))
+#GridSearch <- bind_rows(cbind(tibble(model="fGARCH", submodel="TGARCH"), mtr),
+#                        cbind(tibble(model="fGARCH", submodel="GARCH"), mtr)) %>%
+#  tibble::rownames_to_column("id")
+
+#Rodando cada linha especificação do GridSearch nos modelos
+#bestModels <- ativosAnalisados |> 
+#  set_names() |> 
+#  map(find_best_garch, grid=GridSearch) |> 
+#  bind_rows(.id="Ativo")
+
+#Escolhando a melhor especificação para cada ativo através do Critério de Akaike
+#modeloFinal <-  bestModels %>%
+#  dplyr::filter(criteria == 'Akaike') |> 
+#  group_by(Ativo) |> 
+#  slice(which.min(V1)) |> 
+#  merge(GridSearch, by.x="id", by.y="id", all.x=FALSE, all.y=FALSE) |> 
+#  select(-id) |> 
+#  rename(criteriaValue=V1)
+  
+
+modeloFinal <- tibble(Ativo=c("ITAUBZ18", "PRIOBZ26", "ITAUBZ17","STNE28","MOVIBZ31","SIMPAR31", "CMIGBZ24","HIDRVS31"),
+             criteria = "Akaike",
+             criteriaValue =
+               c(-10.031020,-9.597698,-9.773093,-8.156528,-8.245174,-8.243398,-10.194153, -9.042531),
+             model="fGARCH",
+             submodel=c("GARCH","GARCH","GARCH","GARCH","GARCH","GARCH","TGARCH","TGARCH"),
+             m=c(2,2,2,2,2,2,0,0),
+             n=c(1,1,2,2,2,2,1,2),
+             p=c(0,2,0,1,2,3,3,0),
+             q=c(0,1,2,2,0,0,3,0),
+             dist="std"
+             
+             )
+
+modeloFinal
+```
+
+### Simulando - Predição dos retornos futuros
+
+Tendo as especificações finais de cada modelo para cada série de retorno analisada, iremos simular **100 cenários** futuros para os próximos **60 dias** e agregar os resultados pela média das predições das simulações em cada data futura.
+
+```{r}
+#df para salvar os resultados
+#saveResult <- tibble(dataFutura=as.character(),
+#                     Ativo=as.character(), 
+#                     rPrevisto=as.double())
+
+#for (i in seq(1,nrow(modeloFinal))){
+
+#o modelo roda somente no df com o retorno do ativo:
+#rAtivo <- bondsTibble |>
+#  dplyr::filter(Ativo == modeloFinal[i,]$Ativo) |>
+#  select(Dates, rDiario) |>
+#  column_to_rownames(var = 'Dates')
+
+#especificação do modelo conforme o grid search: 
+#specModel <- ugarchspec(
+#              variance.model = list(model=modeloFinal[i,]$model, #submodel=modeloFinal[i,]$submodel, garchOrder=c(modeloFinal[i,]$m, #modeloFinal[i,]$n)),
+#              mean.model = list(armaOrder = c(modeloFinal[i,]$p, modeloFinal[i,]$q), #include.mean = TRUE),
+#              distribution.model = modeloFinal[i,]$dist)
+
+#fitando o modelo especificado 
+#fitModel <- ugarchfit(
+#            spec = specModel,
+#            data = rAtivo,
+#            solver = 'hybrid')
+            #solver.control = list(tol = 5e-8))
+            #out.sample = 10)
+
+#simulando diversos cenários 
+#simuModel <- ugarchsim(fitModel,
+#                       n.sim = 60,
+#                       m.sim = 100,
+#                       rseed = 42)
+
+#o retorno previsto dos ativos é a média de todos os cenários simulados
+#resultSimu <- simuModel |> fitted() |> as.data.frame() 
+#resultSimu <- resultSimu |> mutate(rMedio = rowMeans(resultSimu)) |> rownames_to_column("dataFutura")
+
+#resultModel <- resultSimu |> select(dataFutura, rMedio)
+
+#saveResult <- saveResult |> bind_rows(tibble(dataFutura=resultModel$dataFutura,Ativo=modeloFinal[i,]$Ativo, rPrevisto=resultModel$rMedio))
+
+#}
+
+```
+
+## Resultados
+
+As predições são geradas em um arquivo .csv para posterior manipulação via excel.
+
+```{r result}
+
+
+#saveResult |> write.csv("resultfinal.csv") 
+
+```
+
+Geramos os gráficos de predições (série a direita da linha vertical).
+
+```{r result graphs}
+saveResult<-read.csv("resultfinal.csv")
+saveResult<- saveResult|> select(-X)
+dataAtual <- bondsTibble$Dates |> max()
+anoAtual <-  bondsTibble$Dates |> year() |> max()
+
+resultGraph <- saveResult |> group_by(Ativo) |> mutate(diaFuturo=row_number())
+resultGraph <- resultGraph |> mutate(Dates=add.bizdays(dataAtual,diaFuturo))
+resultGraph <- resultGraph |> rename(rDiario=rPrevisto)
+
+passado <- bondsTibble |> select(Dates, Ativo, rDiario) |> group_by(Ativo)
+futuro <-resultGraph |> select(Dates, Ativo, rDiario)
+consolidado<-bind_rows(passado,futuro)
+
+consolidado |> dplyr::filter(year(Dates)>= anoAtual-1) |> 
+               ggplot(aes(x=Dates, y=rDiario, color=Ativo))+
+               geom_line()+
+               geom_vline(xintercept=dataAtual)+
+               facet_wrap(~Ativo,ncol = 2)
+```
+
+
+
